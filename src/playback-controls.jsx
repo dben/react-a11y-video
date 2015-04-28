@@ -3,32 +3,35 @@ import React from 'react';
 import PlayPause from './play-pause';
 import Navigate from './navigate';
 
+import SpeedControls from './speed-controls';
+
 let PlaybackControls = React.createClass({
-
-    getInitialState() {
-
+    getDefaultProps() {
         return {
-
-            playing: false
+            api: undefined,
+            navStep: 10
         };
-    },
-
-    _onPlayPause() {
-
-        this.setState({ playing: !this.state.playing }, () => {
-
-            this.props[this.state.playing ? 'onPlay' : 'onPause']();
-        });
     },
 
     _onRewind() {
 
-        this.props.onNavigate(false);
+        let currTime = this.props.api.currentTime,
+            navStep = this.props.navStep;
+
+        this.props.api.currentTime = currTime - navStep;
     },
 
     _onFastForward() {
 
-        this.props.onNavigate(true);
+        let currTime = this.props.api.currentTime,
+            navStep = this.props.navStep;
+
+        this.props.api.currentTime = currTime + navStep;
+    },
+
+    _onRepeat() {
+
+        this.props.api.currentTime = 0;
     },
 
     render() {
@@ -37,7 +40,7 @@ let PlaybackControls = React.createClass({
 
             <div className='playback-controls'>
 
-                <Navigate onNavigate={this.props.onRepeat}>
+                <Navigate onNavigate={this._onRepeat}>
 
                     Repeat
                 </Navigate>
@@ -47,13 +50,14 @@ let PlaybackControls = React.createClass({
                     Back
                 </Navigate>
 
-                <PlayPause playing={this.state.playing}
-                           onPlayPause={this._onPlayPause} />
+                <PlayPause api={this.props.api} />
 
                 <Navigate onNavigate={this._onFastForward}>
 
                     Forward
                 </Navigate>
+
+                <SpeedControls api={this.props.api} />
 
             </div>
         );
